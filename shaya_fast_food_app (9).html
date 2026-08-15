@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHAYA FAST FOOD - Online Ordering & Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        .gold-glow {
+            text-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+        }
+        @keyframes ringBell {
+            0% { transform: rotate(0deg); }
+            20% { transform: rotate(15deg); }
+            40% { transform: rotate(-15deg); }
+            60% { transform: rotate(10deg); }
+            80% { transform: rotate(-10deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .animate-ring {
+            animation: ringBell 0.8s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+
+    <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Clicking Logo triggers Admin Login -->
+            <div class="flex items-center space-x-3 cursor-pointer group" onclick="checkAdminAccess()" title="Click here for Admin Panel">
+                <div class="bg-amber-500 text-black font-black p-2 rounded-xl shadow-md flex items-center justify-center group-hover:scale-105 transition">
+                    <i class="fa-solid fa-burger text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-wider text-amber-400 flex items-center gap-2">
+                        SHAYA 
+                        <span id="adminBadgeDot" class="hidden w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+                    </h1>
+                    <p class="text-xs text-slate-400 tracking-widest uppercase">Fast Food • 95 Junction</p>
+                </div>
+            </div>
+
+            <!-- Navigation Actions -->
+            <div class="flex items-center space-x-3">
+                <!-- Cart Button -->
+                <button id="navCartBtn" onclick="toggleCart()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl border border-slate-700 transition">
+                    <i class="fa-solid fa-bag-shopping text-lg"></i>
+                    <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6">
+        
+        <div id="storeStatusBanner" class="hidden mb-6 p-4 rounded-xl bg-red-950/80 border border-red-700/50 flex items-center justify-between text-red-200">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-clock text-2xl text-red-400"></i>
+                <div>
+                    <h4 class="font-bold">Store Currently Closed</h4>
+                    <p class="text-xs text-red-300">Open Hours: 4:00 PM to 10:00 PM. (Friday Closed).</p>
+                </div>
+            </div>
+            <span class="text-xs bg-red-900 text-white px-3 py-1 rounded-full font-bold">Offline</span>
+        </div>
+
+        <!-- ==================== CUSTOMER VIEW ==================== -->
+        <div id="customerView" class="space-y-6">
+            
+            <!-- Hero Banner -->
+            <div class="relative rounded-3xl overflow-hidden hero-gradient border border-slate-800 p-6 md:p-10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="max-w-xl relative z-10 space-y-4">
+                    <span class="inline-block bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                        🔥 Taste That Hits Different!
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-black text-white leading-tight">
+                        One Bite <span class="text-amber-400 gold-glow">One Love!</span>
+                    </h2>
+                    <p class="text-slate-300 text-sm md:text-base">
+                        Delicious juicy burgers, loaded hot sandwiches, crispy rolls and golden fries prepared fresh for you!
+                    </p>
+                    <div class="flex flex-wrap gap-4 pt-2 text-xs text-slate-400">
+                        <div class="flex items-center space-x-1.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="fa-solid fa-location-dot text-amber-400"></i>
+                            <span>95 Junction, Ipothana</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="fa-solid fa-phone text-amber-400"></i>
+                            <span>0750733351</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="fa-solid fa-clock text-amber-400"></i>
+                            <span>4 PM - 10 PM</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-80 h-52 rounded-2xl overflow-hidden shadow-2xl border border-slate-700 flex-shrink-0 relative group">
+                    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80" alt="Delicious Fast Food" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x400/1e293b/fbbf24?text=Shaya+Fast+Food'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-4">
+                        <span class="text-xs font-bold text-amber-400 bg-black/60 px-3 py-1 rounded-full backdrop-blur">⭐ Fresh Daily Specials</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Offers Banner Slider / List -->
+            <div id="customerOffersSection" class="space-y-3">
+                <h3 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-tags text-amber-400"></i> Special Offers & Discounts
+                </h3>
+                <div id="customerOffersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- Live Order Tracking Section for Customer -->
+            <div id="customerLiveTrackerSection" class="hidden bg-slate-800/80 p-6 rounded-2xl border border-amber-500/40 shadow-xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
+                        <h3 class="font-bold text-lg text-white">Live Order Status Tracker</h3>
+                    </div>
+                    <span id="trackerOrderId" class="text-xs font-bold bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full border border-amber-500/30">Order #</span>
+                </div>
+                <div id="trackerDetails" class="text-sm text-slate-300"></div>
+                <!-- Progress bar -->
+                <div class="relative pt-2">
+                    <div class="flex mb-2 items-center justify-between text-xs font-bold text-slate-400">
+                        <span id="stepPending" class="text-amber-400">1. Pending</span>
+                        <span id="stepPreparing">2. Preparing</span>
+                        <span id="stepReady">3. Ready</span>
+                        <span id="stepDelivered">4. Delivered</span>
+                    </div>
+                    <div class="overflow-hidden h-2.5 mb-4 text-xs flex rounded bg-slate-900 border border-slate-700">
+                        <div id="trackerProgressBar" style="width: 25%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-amber-500 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Filter Tabs -->
+            <div id="categoryTabsContainer" class="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none"></div>
+
+            <!-- Menu Grid -->
+            <div>
+                <h3 class="text-xl font-bold mb-4 text-slate-200">Our Menu List</h3>
+                <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            </div>
+        </div>
+
+        <!-- ==================== ADMIN VIEW ==================== -->
+        <div id="adminView" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-800/60 p-6 rounded-2xl border border-slate-700">
+                <div>
+                    <h2 class="text-2xl font-black text-amber-400">Admin Control Dashboard</h2>
+                    <p class="text-sm text-slate-400">Manage customer orders, update menu prices, offers & store hours.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button onclick="switchView('customer')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+                        <i class="fa-solid fa-store"></i>
+                        <span>Back to Store</span>
+                    </button>
+                    <button onclick="updateDeliveryCharge()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+                        <i class="fa-solid fa-truck"></i>
+                        <span>Set Delivery Charge</span>
+                    </button>
+                    <button onclick="changeAdminPassword()" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+                        <i class="fa-solid fa-key"></i>
+                        <span>Change Password</span>
+                    </button>
+                    <button onclick="toggleStoreStatus()" id="storeToggleBtn" class="px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center space-x-2">
+                        <!-- Dynamic Status -->
+                    </button>
+                    <button onclick="openAddProductModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add New Item</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-400 text-sm">Total Orders</span>
+                        <i class="fa-solid fa-receipt text-amber-400 text-xl"></i>
+                    </div>
+                    <h3 id="statTotalOrders" class="text-3xl font-black mt-2 text-white">0</h3>
+                </div>
+                <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-400 text-sm">Today's Revenue</span>
+                        <i class="fa-solid fa-wallet text-emerald-400 text-xl"></i>
+                    </div>
+                    <h3 id="statRevenue" class="text-3xl font-black mt-2 text-emerald-400">Rs. 0</h3>
+                </div>
+                <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-400 text-sm">Active Menu Items</span>
+                        <i class="fa-solid fa-utensils text-blue-400 text-xl"></i>
+                    </div>
+                    <h3 id="statMenuItems" class="text-3xl font-black mt-2 text-blue-400">0</h3>
+                </div>
+            </div>
+
+            <!-- Tabs inside Admin -->
+            <div class="flex space-x-2 border-b border-slate-800 pb-2 overflow-x-auto">
+                <button onclick="switchAdminTab('orders')" id="adminTabOrdersBtn" class="relative px-4 py-2 font-bold text-sm rounded-lg bg-amber-500 text-black transition whitespace-nowrap flex items-center space-x-2">
+                    <i id="ordersBellIcon" class="fa-solid fa-bell"></i>
+                    <span>Incoming Orders</span>
+                    <span id="incomingCountBadge" class="ml-1.5 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">0</span>
+                </button>
+                <button onclick="switchAdminTab('deliveries')" id="adminTabDeliveriesBtn" class="px-4 py-2 font-bold text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap flex items-center space-x-2">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    <span>Deliveries</span>
+                    <span id="deliveryCountBadge" class="ml-1.5 bg-slate-700 text-slate-300 text-xs px-2 py-0.5 rounded-full">0</span>
+                </button>
+                <button onclick="switchAdminTab('menu')" id="adminTabMenuBtn" class="px-4 py-2 font-bold text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap flex items-center space-x-2">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span>Menu Management</span>
+                </button>
+                <button onclick="switchAdminTab('offers')" id="adminTabOffersBtn" class="px-4 py-2 font-bold text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap flex items-center space-x-2">
+                    <i class="fa-solid fa-tags"></i>
+                    <span>Offer & Coupon Management</span>
+                </button>
+            </div>
+
+            <!-- Admin Orders Tab Content -->
+            <div id="adminOrdersSection" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-slate-200">Active Customer Orders (Pending, Preparing, Ready)</h3>
+                    <span class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">🔔 Live Audio & Animation Active</span>
+                </div>
+                <div id="adminOrdersList" class="space-y-3"></div>
+            </div>
+
+            <!-- Admin Deliveries Tab Content -->
+            <div id="adminDeliveriesSection" class="hidden space-y-4">
+                <h3 class="text-lg font-bold text-slate-200">Completed Deliveries List</h3>
+                <div id="adminDeliveriesList" class="space-y-3"></div>
+            </div>
+
+            <!-- Admin Menu Tab Content -->
+            <div id="adminMenuSection" class="hidden space-y-4">
+                <h3 class="text-lg font-bold text-slate-200">Menu Items List</h3>
+                <div class="bg-slate-800/60 rounded-2xl border border-slate-700 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-800 text-slate-400 text-xs uppercase border-b border-slate-700">
+                                    <th class="p-4">Image</th>
+                                    <th class="p-4">Item Name</th>
+                                    <th class="p-4">Category</th>
+                                    <th class="p-4">Price</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminMenuTableBody" class="divide-y divide-slate-700/50 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Offers Tab Content -->
+            <div id="adminOffersSection" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-slate-200">Special Offers & Coupons List</h3>
+                    <button onclick="openAddOfferModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add New Offer</span>
+                    </button>
+                </div>
+                <div class="bg-slate-800/60 rounded-2xl border border-slate-700 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-800 text-slate-400 text-xs uppercase border-b border-slate-700">
+                                    <th class="p-4">Title</th>
+                                    <th class="p-4">Coupon Code</th>
+                                    <th class="p-4">Discount (%)</th>
+                                    <th class="p-4">Description</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminOffersTableBody" class="divide-y divide-slate-700/50 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+        <p>&copy; 2026 SHAYA FAST FOOD. All Rights Reserved. | 95 Junction, Ipothana.</p>
+    </footer>
+
+    <!-- ==================== CART / CHECKOUT SIDEBAR MODAL ==================== -->
+    <div id="cartModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex justify-end">
+        <div class="bg-slate-900 w-full max-w-md h-full flex flex-col justify-between border-l border-slate-800 shadow-2xl p-6">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-bag-shopping text-amber-400 text-xl"></i>
+                    <h3 class="font-bold text-lg text-white">Your Food Cart</h3>
+                </div>
+                <button onclick="toggleCart()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Cart Items List -->
+            <div id="cartItemsList" class="flex-grow overflow-y-auto py-4 space-y-3"></div>
+
+            <!-- Checkout Details Form -->
+            <div class="border-t border-slate-800 pt-4 space-y-3">
+                <!-- Coupon Box -->
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="couponInput" placeholder="Enter Coupon Code" class="flex-grow bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white uppercase focus:outline-none focus:border-amber-500">
+                    <button onclick="applyCoupon()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold transition">Apply</button>
+                </div>
+                <div id="appliedCouponMsg" class="text-xs text-emerald-400 hidden"></div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400">Customer Name</label>
+                    <input type="text" id="custName" autocomplete="off" placeholder="Enter your name" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400">Phone Number</label>
+                    <input type="tel" id="custPhone" autocomplete="off" placeholder="07XXXXXXXX" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400">Delivery Address</label>
+                    <textarea id="custAddress" rows="2" autocomplete="off" placeholder="Enter your address" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-amber-500 resize-none"></textarea>
+                </div>
+
+                <div class="space-y-1 pt-2 text-sm">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Subtotal:</span>
+                        <span id="cartSubtotal">Rs. 0</span>
+                    </div>
+                    <div id="discountRow" class="flex justify-between text-emerald-400 hidden">
+                        <span>Discount:</span>
+                        <span id="cartDiscount">- Rs. 0</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Delivery Charge:</span>
+                        <span id="cartDeliveryCharge">Rs. 150</span>
+                    </div>
+                    <div class="flex justify-between items-center font-bold text-base border-t border-slate-800 pt-2">
+                        <span class="text-slate-200">Total Amount:</span>
+                        <span id="cartTotalPrice" class="text-amber-400 text-xl">Rs. 0</span>
+                    </div>
+                </div>
+
+                <button onclick="placeOrder()" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span>Place Order</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADD / EDIT PRODUCT MODAL ==================== -->
+    <div id="productModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h3 id="productModalTitle" class="font-bold text-lg text-amber-400">Add New Item</h3>
+                <button onclick="closeProductModal()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <input type="hidden" id="editProductId">
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs font-bold text-slate-400">Item Name</label>
+                    <input type="text" id="modalItemName" placeholder="e.g. Zinger Burger" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400">Category</label>
+                    <input type="text" id="modalItemCategory" placeholder="e.g. Burgers, Sandwich, Rolls" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400">Price (in Rs.)</label>
+                    <input type="number" id="modalItemPrice" placeholder="550" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400">Image URL</label>
+                    <input type="text" id="modalItemImage" placeholder="https://images.unsplash.com/..." class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400">Description</label>
+                    <input type="text" id="modalItemDesc" placeholder="Juicy & Tasty chicken burger..." class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="closeProductModal()" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl transition">Cancel</button>
+                <button onclick="saveProduct()" class="w-1/2 bg-amber-500 hover:bg-amber-400 text-black font-bold py-2.5 rounded-xl transition">Save Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADD / EDIT OFFER MODAL ==================== -->
+    <div id="offerModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h3 id="offerModalTitle" class="font-bold text-lg text-amber-400">Add New Offer</h3>
+                <button onclick="closeOfferModal()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <input type="hidden" id="editOfferId">
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs font-bold text-slate-400">Offer Title</label>
+                    <input type="text" id="modalOfferTitle" placeholder="e.g. Weekend Special Discount" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400">Coupon Code</label>
+                    <input type="text" id="modalOfferCode" placeholder="e.g. SHAYA10" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white uppercase focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400">Discount Percentage (%)</label>
+                    <input type="number" id="modalOfferDiscount" placeholder="10" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400">Description</label>
+                    <input type="text" id="modalOfferDesc" placeholder="Get 10% off on all orders above Rs. 1000" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="closeOfferModal()" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl transition">Cancel</button>
+                <button onclick="saveOffer()" class="w-1/2 bg-amber-500 hover:bg-amber-400 text-black font-bold py-2.5 rounded-xl transition">Save Offer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== CUSTOM MESSAGE MODAL ==================== -->
+    <div id="msgModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-800 shadow-2xl p-6 text-center space-y-4">
+            <div id="msgIconContainer" class="w-14 h-14 mx-auto rounded-full flex items-center justify-center text-2xl bg-amber-500/20 text-amber-400">
+                <i class="fa-solid fa-info"></i>
+            </div>
+            <h4 id="msgTitle" class="font-bold text-lg text-white">Message</h4>
+            <p id="msgBody" class="text-sm text-slate-400">Information...</p>
+            <button onclick="closeMsgModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-2.5 rounded-xl transition">OK</button>
+        </div>
+    </div>
+
+    <script>
+        let menuItems = [
+            { 
+                id: 1, 
+                name: 'Crispy Chicken Burger', 
+                category: 'Burgers', 
+                price: 650, 
+                desc: 'Juicy & Tasty with extra cheese and crunchy lettuce', 
+                image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+                available: true 
+            },
+            { 
+                id: 2, 
+                name: 'Double Patty Burger', 
+                category: 'Burgers', 
+                price: 850, 
+                desc: 'Loaded with double chicken patties and melted cheddar', 
+                image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=600&q=80',
+                available: true 
+            },
+            { 
+                id: 3, 
+                name: 'Spicy Chicken Sandwich', 
+                category: 'Sandwich', 
+                price: 550, 
+                desc: 'Freshly toasted bread loaded with veggies and spicy sauce', 
+                image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
+                available: true 
+            },
+            { 
+                id: 4, 
+                name: 'Special Club Sandwich', 
+                category: 'Sandwich', 
+                price: 700, 
+                desc: 'Layered multi-deck chicken, fried egg and fresh vegetables', 
+                image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80',
+                available: true 
+            },
+            { 
+                id: 5, 
+                name: 'Spicy Chicken Roll', 
+                category: 'Rolls', 
+                price: 450, 
+                desc: 'Spicy marinated chicken wrapped tightly in flaky paratha', 
+                image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=600&q=80',
+                available: true 
+            },
+            { 
+                id: 6, 
+                name: 'Crispy French Fries', 
+                category: 'Fries', 
+                price: 350, 
+                desc: 'Golden crispy potato sticks seasoned with special spices', 
+                image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=600&q=80',
+                available: true 
+            }
+        ];
+
+        let offers = [
+            { id: 1, title: 'Weekend Special Offer', code: 'SHAYA10', discount: 10, desc: 'Get 10% off on your entire food order!', available: true },
+            { id: 2, title: 'Mega Feast Discount', code: 'SHAYA20', discount: 20, desc: 'Get 20% off for orders above Rs. 1500!', available: true }
+        ];
+
+        let cart = [];
+        let appliedCoupon = null;
+        let discountAmount = 0;
+
+        let orders = [];
+
+        let storeOpen = true;
+        let currentCategory = 'All';
+        let currentAdminTab = 'orders';
+        let activeMyOrderId = null;
+        let isAdminLoggedIn = false;
+        
+        let deliveryCharge = 150;
+        let adminPassword = "shaya";
+
+        window.onload = function() {
+            renderCategoryTabs();
+            renderMenu();
+            renderCustomerOffers();
+            updateCartCount();
+            renderAdminOrders();
+            renderAdminDeliveries();
+            renderAdminMenuTable();
+            renderAdminOffersTable();
+            updateAdminStats();
+            checkStoreTiming();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('admin')) {
+                checkAdminAccess();
+            }
+        };
+
+        function checkAdminAccess() {
+            let password = prompt("Admin பாஸ்வேர்டை உள்ளிடவும்:");
+            if (password === null) return;
+            if (password === adminPassword) {
+                isAdminLoggedIn = true;
+                switchView('admin');
+            } else {
+                showMsg("Access Denied", "தவறான பாஸ்வேர்ட்!", "error");
+            }
+        }
+
+        function changeAdminPassword() {
+            let oldPass = prompt("பழைய பாஸ்வேர்டை உள்ளிடவும்:");
+            if (oldPass === null) return;
+            if (oldPass === adminPassword) {
+                let newPass = prompt("புதிய பாஸ்வேர்டை உள்ளிடவும்:");
+                if (newPass && newPass.trim() !== "") {
+                    adminPassword = newPass.trim();
+                    showMsg("Success", "பாஸ்வேர்ட் வெற்றிகரமாக மாற்றப்பட்டது!", "success");
+                }
+            } else {
+                showMsg("Error", "பழைய பாஸ்வேர்ட் தவறு!", "error");
+            }
+        }
+
+        function updateDeliveryCharge() {
+            let newCharge = prompt("புதிய Delivery Charge மதிப்பை உள்ளிடவும் (Rs.):", deliveryCharge);
+            if (newCharge !== null && !isNaN(newCharge)) {
+                deliveryCharge = parseFloat(newCharge);
+                showMsg("Success", `Delivery Charge Rs. ${deliveryCharge} என மாற்றப்பட்டது.`, "success");
+                renderCartItems();
+            }
+        }
+
+        function switchView(view) {
+            const custView = document.getElementById('customerView');
+            const adminView = document.getElementById('adminView');
+            const cartBtn = document.getElementById('navCartBtn');
+
+            if (view === 'customer') {
+                isAdminLoggedIn = false;
+                custView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                cartBtn.classList.remove('hidden');
+                renderCustomerOffers();
+            } else {
+                isAdminLoggedIn = true;
+                custView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                cartBtn.classList.add('hidden');
+                
+                document.getElementById('adminBadgeDot').classList.add('hidden');
+                document.getElementById('ordersBellIcon').classList.remove('animate-ring');
+            }
+        }
+
+        function checkStoreTiming() {
+            const banner = document.getElementById('storeStatusBanner');
+            const toggleBtn = document.getElementById('storeToggleBtn');
+
+            if (storeOpen) {
+                banner.classList.add('hidden');
+                toggleBtn.className = "px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white";
+                toggleBtn.innerHTML = '<i class="fa-solid fa-circle text-xs text-green-300 animate-pulse"></i><span>Store Open</span>';
+            } else {
+                banner.classList.remove('hidden');
+                toggleBtn.className = "px-4 py-2 rounded-xl text-sm font-bold shadow transition flex items-center space-x-2 bg-red-600 hover:bg-red-500 text-white";
+                toggleBtn.innerHTML = '<i class="fa-solid fa-circle text-xs text-red-300"></i><span>Store Closed</span>';
+            }
+        }
+
+        function toggleStoreStatus() {
+            storeOpen = !storeOpen;
+            checkStoreTiming();
+            showMsg("Store Status Updated", storeOpen ? "Store is now open for orders." : "Store is now closed.", "success");
+        }
+
+        function renderCategoryTabs() {
+            const container = document.getElementById('categoryTabsContainer');
+            container.innerHTML = '';
+
+            const categories = ['All', ...new Set(menuItems.map(item => item.category))];
+
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                const isActive = currentCategory === cat;
+                btn.className = `cat-btn px-5 py-2.5 rounded-xl font-bold text-sm transition whitespace-nowrap ${isActive ? 'bg-amber-500 text-black shadow' : 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'}`;
+                
+                let icon = 'fa-utensils';
+                if (cat.toLowerCase().includes('burger')) icon = 'fa-burger';
+                if (cat.toLowerCase().includes('sandwich')) icon = 'fa-bread-slice';
+                if (cat.toLowerCase().includes('roll')) icon = 'fa-cookie-bite';
+
+                btn.innerHTML = `<i class="fa-solid ${icon} mr-1.5"></i> ${cat}`;
+                btn.onclick = () => filterCategory(cat);
+                container.appendChild(btn);
+            });
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            renderCategoryTabs();
+            renderMenu();
+        }
+
+        function renderCustomerOffers() {
+            const grid = document.getElementById('customerOffersGrid');
+            const section = document.getElementById('customerOffersSection');
+            grid.innerHTML = '';
+
+            const activeOffers = offers.filter(o => o.available);
+            if (activeOffers.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            activeOffers.forEach(offer => {
+                const card = document.createElement('div');
+                card.className = "bg-gradient-to-r from-amber-500/20 to-slate-800 p-4 rounded-2xl border border-amber-500/40 flex items-center justify-between shadow-lg";
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <span class="text-xs font-bold bg-amber-500 text-black px-2.5 py-0.5 rounded-md uppercase">${offer.code}</span>
+                        <h4 class="font-bold text-white text-sm">${offer.title}</h4>
+                        <p class="text-xs text-slate-300">${offer.desc}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-2xl font-black text-amber-400">${offer.discount}%</span>
+                        <span class="block text-[10px] text-slate-400 uppercase">OFF</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderMenu() {
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = '';
+
+            const filtered = currentCategory === 'All' ? menuItems : menuItems.filter(i => i.category.toLowerCase() === currentCategory.toLowerCase());
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500">No items available in this category.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `bg-slate-800/80 rounded-2xl border ${item.available ? 'border-slate-700' : 'border-red-900/50 opacity-60'} overflow-hidden shadow-xl flex flex-col justify-between transition hover:border-amber-500/50 group`;
+                
+                let defaultFallback = 'https://placehold.co/600x400/1e293b/fbbf24?text=Shaya+Fast+Food';
+
+                card.innerHTML = `
+                    <div>
+                        <div class="h-44 w-full overflow-hidden relative bg-slate-900">
+                            <img src="${item.image || defaultFallback}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='${defaultFallback}'">
+                            <div class="absolute top-3 left-3">
+                                <span class="text-xs font-bold px-3 py-1 rounded-lg bg-black/60 text-amber-400 backdrop-blur border border-amber-500/20">${item.category}</span>
+                            </div>
+                            <div class="absolute top-3 right-3">
+                                <span class="text-xs font-bold ${item.available ? 'text-emerald-300 bg-emerald-950/80 border border-emerald-700/50' : 'text-red-300 bg-red-950/80 border border-red-700/50'} px-2.5 py-1 rounded-md backdrop-blur">
+                                    ${item.available ? 'Available' : 'Out of Stock'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-2">
+                            <h4 class="font-bold text-white text-base leading-tight">${item.name}</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">${item.desc}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0 flex items-center justify-between border-t border-slate-700/50 mt-2">
+                        <div>
+                            <span class="text-xs text-slate-400 block">Price</span>
+                            <span class="text-lg font-black text-amber-400">Rs. ${item.price}</span>
+                        </div>
+                        <button onclick="addToCart(${item.id})" ${!item.available || !storeOpen ? 'disabled' : ''} class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:bg-slate-700 disabled:text-slate-500 text-black font-bold rounded-xl text-sm shadow transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleCart() {
+            const modal = document.getElementById('cartModal');
+            modal.classList.toggle('hidden');
+            renderCartItems();
+        }
+
+        function addToCart(id) {
+            if (!storeOpen) {
+                showMsg("Store Closed", " தற்போது கடை மூடப்பட்டுள்ளது. ஆர்டர் செய்ய இயலாது.", "error");
+                return;
+            }
+            const item = menuItems.find(i => i.id === id);
+            if (!item || !item.available) return;
+
+            const existing = cart.find(c => c.id === id);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...item, qty: 1 });
+            }
+            updateCartCount();
+            showMsg("Success", `${item.name} added to cart!`, "success");
+        }
+
+        function updateCartCount() {
+            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartCount').innerText = totalQty;
+        }
+
+        function applyCoupon() {
+            const codeInput = document.getElementById('couponInput').value.trim().toUpperCase();
+            const msgEl = document.getElementById('appliedCouponMsg');
+
+            if (!codeInput) return;
+
+            const foundOffer = offers.find(o => o.code === codeInput && o.available);
+            if (foundOffer) {
+                appliedCoupon = foundOffer;
+                msgEl.classList.remove('hidden');
+                msgEl.innerText = `Coupon '${foundOffer.code}' applied! (${foundOffer.discount}% OFF)`;
+                renderCartItems();
+            } else {
+                appliedCoupon = null;
+                msgEl.classList.add('hidden');
+                showMsg("Error", "Invalid or expired coupon code.", "error");
+                renderCartItems();
+            }
+        }
+
+        function renderCartItems() {
+            const list = document.getElementById('cartItemsList');
+            list.innerHTML = '';
+
+            if (cart.length === 0) {
+                list.innerHTML = `<div class="text-center py-10 text-slate-500">Your cart is empty.</div>`;
+                document.getElementById('cartSubtotal').innerText = 'Rs. 0';
+                document.getElementById('discountRow').classList.add('hidden');
+                document.getElementById('cartDeliveryCharge').innerText = `Rs. ${deliveryCharge}`;
+                document.getElementById('cartTotalPrice').innerText = 'Rs. 0';
+                appliedCoupon = null;
+                document.getElementById('appliedCouponMsg').classList.add('hidden');
+                document.getElementById('couponInput').value = '';
+                return;
+            }
+
+            let subtotal = 0;
+            cart.forEach((item, index) => {
+                subtotal += item.price * item.qty;
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-sm";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover" onerror="this.src='https://placehold.co/100x100/1e293b/fbbf24?text=Food'">
+                        <div>
+                            <h5 class="font-bold text-white">${item.name}</h5>
+                            <span class="text-xs text-amber-400">Rs. ${item.price} x ${item.qty}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="changeQty(${index}, -1)" class="w-7 h-7 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold flex items-center justify-center">-</button>
+                        <span class="font-bold w-5 text-center">${item.qty}</span>
+                        <button onclick="changeQty(${index}, 1)" class="w-7 h-7 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold flex items-center justify-center">+</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            discountAmount = 0;
+            if (appliedCoupon) {
+                discountAmount = (subtotal * appliedCoupon.discount) / 100;
+                document.getElementById('discountRow').classList.remove('hidden');
+                document.getElementById('cartDiscount').innerText = `- Rs. ${discountAmount.toFixed(0)}`;
+            } else {
+                document.getElementById('discountRow').classList.add('hidden');
+            }
+
+            let finalTotal = subtotal - discountAmount + deliveryCharge;
+            document.getElementById('cartSubtotal').innerText = `Rs. ${subtotal}`;
+            document.getElementById('cartDeliveryCharge').innerText = `Rs. ${deliveryCharge}`;
+            document.getElementById('cartTotalPrice').innerText = `Rs. ${finalTotal.toFixed(0)}`;
+        }
+
+        function changeQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            updateCartCount();
+            renderCartItems();
+        }
+
+        function placeOrder() {
+            // கடை மூடியிருந்தால் ஆர்டரைத் தடுத்தல்
+            if (!storeOpen) {
+                showMsg("Store Closed", "மன்னிக்கவும்! தற்போது கடை மூடப்பட்டுள்ளது. புதிய ஆர்டர்கள் ஏற்றுக்கொள்ளப்படவில்லை.", "error");
+                return;
+            }
+
+            if (cart.length === 0) {
+                showMsg("Error", "Your cart is empty.", "error");
+                return;
+            }
+
+            const nameField = document.getElementById('custName');
+            const phoneField = document.getElementById('custPhone');
+            const addressField = document.getElementById('custAddress');
+
+            const name = nameField.value.trim();
+            const phone = phoneField.value.trim();
+            const address = addressField.value.trim();
+
+            if (!name || !phone || !address) {
+                showMsg("Error", "Please fill in your name, phone number, and delivery address.", "error");
+                return;
+            }
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let finalDiscount = appliedCoupon ? (subtotal * appliedCoupon.discount) / 100 : 0;
+            const total = subtotal - finalDiscount + deliveryCharge;
+            const itemsSummary = cart.map(i => `${i.qty}x ${i.name}`).join(', ');
+
+            const newOrder = {
+                id: 'SHAYA-' + Math.floor(100 + Math.random() * 900),
+                name,
+                phone,
+                address,
+                items: itemsSummary + (appliedCoupon ? ` (Coupon: ${appliedCoupon.code})` : ''),
+                total: Math.round(total),
+                status: 'Pending',
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            orders.unshift(newOrder);
+            activeMyOrderId = newOrder.id;
+            
+            cart = [];
+            appliedCoupon = null;
+            updateCartCount();
+            toggleCart();
+
+            nameField.value = '';
+            phoneField.value = '';
+            addressField.value = '';
+
+            renderAdminOrders();
+            renderAdminDeliveries();
+            updateAdminStats();
+            updateCustomerLiveTracker();
+
+            if (isAdminLoggedIn) {
+                triggerAdminNotification(newOrder);
+            }
+
+            showMsg("Order Placed Successfully! 🎉", `Your Order ID: ${newOrder.id}\n(Delivery Charge Rs. ${deliveryCharge} included)\nYou can track your order status on your screen.`, "success");
+        }
+
+        function updateCustomerLiveTracker() {
+            const section = document.getElementById('customerLiveTrackerSection');
+            if (!activeMyOrderId) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            const order = orders.find(o => o.id === activeMyOrderId);
+            if (!order) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            document.getElementById('trackerOrderId').innerText = `Order #${order.id} (${order.status})`;
+            
+            let progressWidth = '25%';
+            let statusDesc = 'Your order has been received and is pending confirmation.';
+            
+            document.getElementById('stepPending').className = "text-amber-400 font-bold";
+            document.getElementById('stepPreparing').className = "text-slate-400";
+            document.getElementById('stepReady').className = "text-slate-400";
+            document.getElementById('stepDelivered').className = "text-slate-400";
+
+            if (order.status === 'Preparing') {
+                progressWidth = '50%';
+                statusDesc = '👨‍🍳 Kitchen is preparing your delicious food right now!';
+                document.getElementById('stepPreparing').className = "text-blue-400 font-bold";
+            } else if (order.status === 'Ready') {
+                progressWidth = '75%';
+                statusDesc = '🔥 Your order is ready and packed! Out for delivery soon.';
+                document.getElementById('stepReady').className = "text-purple-400 font-bold";
+            } else if (order.status === 'Delivered') {
+                progressWidth = '100%';
+                statusDesc = '✅ Order successfully delivered! Enjoy your meal from Shaya Fast Food.';
+                document.getElementById('stepDelivered').className = "text-emerald-400 font-bold";
+            }
+
+            document.getElementById('trackerProgressBar').style.width = progressWidth;
+            document.getElementById('trackerDetails').innerHTML = `
+                <p class="font-bold text-white mb-1"><i class="fa-solid fa-utensils text-amber-400 mr-2"></i>Items: ${order.items}</p>
+                <p class="text-amber-400 font-semibold mb-1">Status: ${order.status}</p>
+                <p class="text-xs text-slate-400">${statusDesc}</p>
+            `;
+        }
+
+        function triggerAdminNotification(order) {
+            document.getElementById('adminBadgeDot').classList.remove('hidden');
+            document.getElementById('ordersBellIcon').classList.add('animate-ring');
+
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.6);
+            } catch(e) {
+                console.log("Audio not supported");
+            }
+        }
+
+        function switchAdminTab(tab) {
+            currentAdminTab = tab;
+            const ordersBtn = document.getElementById('adminTabOrdersBtn');
+            const deliveriesBtn = document.getElementById('adminTabDeliveriesBtn');
+            const menuBtn = document.getElementById('adminTabMenuBtn');
+            const offersBtn = document.getElementById('adminTabOffersBtn');
+            
+            const ordersSec = document.getElementById('adminOrdersSection');
+            const deliveriesSec = document.getElementById('adminDeliveriesSection');
+            const menuSec = document.getElementById('adminMenuSection');
+            const offersSec = document.getElementById('adminOffersSection');
+
+            ordersBtn.className = "px-4 py-2 font-bold text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap flex items-center space-x-2";
+            deliveriesBtn.className = "px-4 py-2 font-bold text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap flex items-center space-x-2";
+            menuBtn.className = "px-4 py-2 font-bold text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap flex items-center space-x-2";
+            offersBtn.className = "px-4 py-2 font-bold text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition whitespace-nowrap flex items-center space-x-2";
+
+            ordersSec.classList.add('hidden');
+            deliveriesSec.classList.add('hidden');
+            menuSec.classList.add('hidden');
+            offersSec.classList.add('hidden');
+
+            if (tab === 'orders') {
+                ordersBtn.className = "px-4 py-2 font-bold text-sm rounded-lg bg-amber-500 text-black transition whitespace-nowrap flex items-center space-x-2";
+                ordersSec.classList.remove('hidden');
+            } else if (tab === 'deliveries') {
+                deliveriesBtn.className = "px-4 py-2 font-bold text-sm rounded-lg bg-amber-500 text-black transition whitespace-nowrap flex items-center space-x-2";
+                deliveriesSec.classList.remove('hidden');
+            } else if (tab === 'menu') {
+                menuBtn.className = "px-4 py-2 font-bold text-sm rounded-lg bg-amber-500 text-black transition whitespace-nowrap flex items-center space-x-2";
+                menuSec.classList.remove('hidden');
+            } else if (tab === 'offers') {
+                offersBtn.className = "px-4 py-2 font-bold text-sm rounded-lg bg-amber-500 text-black transition whitespace-nowrap flex items-center space-x-2";
+                offersSec.classList.remove('hidden');
+            }
+        }
+
+        function renderAdminOrders() {
+            const list = document.getElementById('adminOrdersList');
+            list.innerHTML = '';
+
+            const activeOrders = orders.filter(o => o.status !== 'Delivered');
+            document.getElementById('incomingCountBadge').innerText = activeOrders.length;
+            document.getElementById('deliveryCountBadge').innerText = orders.filter(o => o.status === 'Delivered').length;
+
+            if (activeOrders.length === 0) {
+                list.innerHTML = `<div class="bg-slate-800/60 p-6 rounded-2xl text-center text-slate-500">No active incoming orders.</div>`;
+                return;
+            }
+
+            activeOrders.forEach((ord) => {
+                const realIndex = orders.findIndex(o => o.id === ord.id);
+
+                let badgeColor = "bg-amber-500/20 text-amber-400 border-amber-500/30";
+                if (ord.status === 'Preparing') badgeColor = "bg-blue-500/20 text-blue-400 border-blue-500/30";
+                if (ord.status === 'Ready') badgeColor = "bg-purple-500/20 text-purple-400 border-purple-500/30";
+
+                const div = document.createElement('div');
+                div.className = "bg-slate-800/80 p-5 rounded-2xl border border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-4";
+                div.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3">
+                            <span class="font-bold text-amber-400 text-base">${ord.id}</span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full border ${badgeColor} font-bold">${ord.status}</span>
+                            <span class="text-xs text-slate-400"><i class="fa-solid fa-clock mr-1"></i>${ord.time}</span>
+                        </div>
+                        <h4 class="font-bold text-white text-base">${ord.name} (${ord.phone})</h4>
+                        <p class="text-xs text-slate-300"><strong class="text-slate-400">Items:</strong> ${ord.items}</p>
+                        <p class="text-xs text-slate-400"><strong class="text-slate-400">Address:</strong> ${ord.address}</p>
+                    </div>
+                    <div class="flex flex-col md:items-end justify-between gap-3">
+                        <span class="text-lg font-black text-amber-400">Rs. ${ord.total}</span>
+                        <div class="flex items-center space-x-2">
+                            <select onchange="updateOrderStatus(${realIndex}, this.value)" class="bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-500">
+                                <option value="Pending" ${ord.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Preparing" ${ord.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                                <option value="Ready" ${ord.status === 'Ready' ? 'selected' : ''}>Ready</option>
+                                <option value="Delivered" ${ord.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function renderAdminDeliveries() {
+            const list = document.getElementById('adminDeliveriesList');
+            list.innerHTML = '';
+
+            const deliveredOrders = orders.filter(o => o.status === 'Delivered');
+            document.getElementById('deliveryCountBadge').innerText = deliveredOrders.length;
+
+            if (deliveredOrders.length === 0) {
+                list.innerHTML = `<div class="bg-slate-800/60 p-6 rounded-2xl text-center text-slate-500">No completed deliveries yet.</div>`;
+                return;
+            }
+
+            deliveredOrders.forEach((ord) => {
+                const realIndex = orders.findIndex(o => o.id === ord.id);
+
+                const div = document.createElement('div');
+                div.className = "bg-slate-800/80 p-5 rounded-2xl border border-emerald-900/50 flex flex-col md:flex-row md:items-center justify-between gap-4";
+                div.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3">
+                            <span class="font-bold text-emerald-400">${ord.id}</span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full border bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-bold">Delivered</span>
+                            <span class="text-xs text-slate-500">${ord.time}</span>
+                        </div>
+                        <h4 class="font-bold text-white text-base">${ord.name} (${ord.phone})</h4>
+                        <p class="text-xs text-slate-300"><strong class="text-slate-400">Items:</strong> ${ord.items}</p>
+                        <p class="text-xs text-slate-400"><strong class="text-slate-400">Address:</strong> ${ord.address}</p>
+                    </div>
+                    <div class="flex flex-col md:items-end justify-between gap-3">
+                        <span class="text-lg font-black text-emerald-400">Rs. ${ord.total}</span>
+                        <div class="flex items-center space-x-2">
+                            <select onchange="updateOrderStatus(${realIndex}, this.value)" class="bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-500">
+                                <option value="Pending" ${ord.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Preparing" ${ord.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                                <option value="Ready" ${ord.status === 'Ready' ? 'selected' : ''}>Ready</option>
+                                <option value="Delivered" ${ord.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function updateOrderStatus(index, status) {
+            orders[index].status = status;
+            renderAdminOrders();
+            renderAdminDeliveries();
+            updateAdminStats();
+            
+            if (activeMyOrderId === orders[index].id) {
+                updateCustomerLiveTracker();
+            }
+
+            showMsg("Status Updated", `Order ${orders[index].id} status changed to ${status}.`, "success");
+        }
+
+        function renderAdminMenuTable() {
+            const tbody = document.getElementById('adminMenuTableBody');
+            tbody.innerHTML = '';
+
+            menuItems.forEach((item) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition";
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <img src="${item.image}" class="w-12 h-12 rounded-xl object-cover border border-slate-700" onerror="this.src='https://placehold.co/100x100/1e293b/fbbf24?text=Food'">
+                    </td>
+                    <td class="p-4 font-bold text-white">
+                        <span>${item.name}</span>
+                    </td>
+                    <td class="p-4 text-slate-300">${item.category}</td>
+                    <td class="p-4 font-bold text-amber-400">Rs. ${item.price}</td>
+                    <td class="p-4">
+                        <span class="text-xs px-2.5 py-1 rounded-full font-bold ${item.available ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-800/50' : 'bg-red-950/50 text-red-400 border border-red-800/50'}">
+                            ${item.available ? 'Active' : 'Out of Stock'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="toggleItemStock(${item.id})" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs" title="Toggle Stock">
+                            <i class="fa-solid ${item.available ? 'fa-eye-slash text-amber-400' : 'fa-eye text-emerald-400'}"></i>
+                        </button>
+                        <button onclick="openEditProductModal(${item.id})" class="p-2 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg text-xs" title="Edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="deleteProduct(${item.id})" class="p-2 bg-slate-800 hover:bg-slate-700 text-red-400 rounded-lg text-xs" title="Delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderAdminOffersTable() {
+            const tbody = document.getElementById('adminOffersTableBody');
+            tbody.innerHTML = '';
+
+            offers.forEach((offer) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition";
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-white">${offer.title}</td>
+                    <td class="p-4"><span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-md font-bold text-xs">${offer.code}</span></td>
+                    <td class="p-4 font-bold text-emerald-400">${offer.discount}%</td>
+                    <td class="p-4 text-slate-300 text-xs">${offer.desc}</td>
+                    <td class="p-4">
+                        <span class="text-xs px-2.5 py-1 rounded-full font-bold ${offer.available ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-800/50' : 'bg-red-950/50 text-red-400 border border-red-800/50'}">
+                            ${offer.available ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="toggleOfferStatus(${offer.id})" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs" title="Toggle Status">
+                            <i class="fa-solid ${offer.available ? 'fa-eye-slash text-amber-400' : 'fa-eye text-emerald-400'}"></i>
+                        </button>
+                        <button onclick="openEditOfferModal(${offer.id})" class="p-2 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg text-xs" title="Edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="deleteOffer(${offer.id})" class="p-2 bg-slate-800 hover:bg-slate-700 text-red-400 rounded-lg text-xs" title="Delete">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function toggleItemStock(id) {
+            const item = menuItems.find(i => i.id === id);
+            if (item) {
+                item.available = !item.available;
+                renderCategoryTabs();
+                renderMenu();
+                renderAdminMenuTable();
+                updateAdminStats();
+            }
+        }
+
+        function deleteProduct(id) {
+            menuItems = menuItems.filter(i => i.id !== id);
+            renderCategoryTabs();
+            renderMenu();
+            renderAdminMenuTable();
+            updateAdminStats();
+            showMsg("Deleted", "Menu item successfully deleted.", "success");
+        }
+
+        function openAddProductModal() {
+            document.getElementById('productModalTitle').innerText = "Add New Item";
+            document.getElementById('editProductId').value = '';
+            document.getElementById('modalItemName').value = '';
+            document.getElementById('modalItemCategory').value = '';
+            document.getElementById('modalItemPrice').value = '';
+            document.getElementById('modalItemImage').value = '';
+            document.getElementById('modalItemDesc').value = '';
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function openEditProductModal(id) {
+            const item = menuItems.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('productModalTitle').innerText = "Edit Item Details";
+            document.getElementById('editProductId').value = item.id;
+            document.getElementById('modalItemName').value = item.name;
+            document.getElementById('modalItemCategory').value = item.category;
+            document.getElementById('modalItemPrice').value = item.price;
+            document.getElementById('modalItemImage').value = item.image || '';
+            document.getElementById('modalItemDesc').value = item.desc;
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.add('hidden');
+        }
+
+        function saveProduct() {
+            const id = document.getElementById('editProductId').value;
+            const name = document.getElementById('modalItemName').value.trim();
+            const categoryInput = document.getElementById('modalItemCategory').value.trim();
+            const price = parseFloat(document.getElementById('modalItemPrice').value);
+            const image = document.getElementById('modalItemImage').value.trim();
+            const desc = document.getElementById('modalItemDesc').value.trim();
+
+            if (!name || !categoryInput || isNaN(price)) {
+                showMsg("Error", "Please enter valid item name, category, and price.", "error");
+                return;
+            }
+
+            const category = categoryInput.charAt(0).toUpperCase() + categoryInput.slice(1);
+            let defaultImg = 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80';
+
+            if (id) {
+                const item = menuItems.find(i => i.id == id);
+                if (item) {
+                    item.name = name;
+                    item.category = category;
+                    item.price = price;
+                    item.image = image || item.image || defaultImg;
+                    item.desc = desc;
+                }
+            } else {
+                const newItem = {
+                    id: Date.now(),
+                    name,
+                    category,
+                    price,
+                    image: image || defaultImg,
+                    desc: desc || 'Fresh and delicious fast food item.',
+                    available: true
+                };
+                menuItems.push(newItem);
+            }
+
+            closeProductModal();
+            renderCategoryTabs();
+            renderMenu();
+            renderAdminMenuTable();
+            updateAdminStats();
+            showMsg("Success", "Menu item details saved successfully!", "success");
+        }
+
+        function openAddOfferModal() {
+            document.getElementById('offerModalTitle').innerText = "Add New Offer";
+            document.getElementById('editOfferId').value = '';
+            document.getElementById('modalOfferTitle').value = '';
+            document.getElementById('modalOfferCode').value = '';
+            document.getElementById('modalOfferDiscount').value = '';
+            document.getElementById('modalOfferDesc').value = '';
+            document.getElementById('offerModal').classList.remove('hidden');
+        }
+
+        function openEditOfferModal(id) {
+            const offer = offers.find(o => o.id === id);
+            if (!offer) return;
+            document.getElementById('offerModalTitle').innerText = "Edit Offer Details";
+            document.getElementById('editOfferId').value = offer.id;
+            document.getElementById('modalOfferTitle').value = offer.title;
+            document.getElementById('modalOfferCode').value = offer.code;
+            document.getElementById('modalOfferDiscount').value = offer.discount;
+            document.getElementById('modalOfferDesc').value = offer.desc;
+            document.getElementById('offerModal').classList.remove('hidden');
+        }
+
+        function closeOfferModal() {
+            document.getElementById('offerModal').classList.add('hidden');
+        }
+
+        function saveOffer() {
+            const id = document.getElementById('editOfferId').value;
+            const title = document.getElementById('modalOfferTitle').value.trim();
+            const code = document.getElementById('modalOfferCode').value.trim().toUpperCase();
+            const discount = parseFloat(document.getElementById('modalOfferDiscount').value);
+            const desc = document.getElementById('modalOfferDesc').value.trim();
+
+            if (!title || !code || isNaN(discount)) {
+                showMsg("Error", "Please enter valid title, coupon code, and discount percentage.", "error");
+                return;
+            }
+
+            if (id) {
+                const offer = offers.find(o => o.id == id);
+                if (offer) {
+                    offer.title = title;
+                    offer.code = code;
+                    offer.discount = discount;
+                    offer.desc = desc;
+                }
+            } else {
+                const newOffer = {
+                    id: Date.now(),
+                    title,
+                    code,
+                    discount,
+                    desc: desc || 'Special promo offer',
+                    available: true
+                };
+                offers.push(newOffer);
+            }
+
+            closeOfferModal();
+            renderCustomerOffers();
+            renderAdminOffersTable();
+            showMsg("Success", "Offer saved successfully!", "success");
+        }
+
+        function toggleOfferStatus(id) {
+            const offer = offers.find(o => o.id === id);
+            if (offer) {
+                offer.available = !offer.available;
+                renderCustomerOffers();
+                renderAdminOffersTable();
+            }
+        }
+
+        function deleteOffer(id) {
+            offers = offers.filter(o => o.id !== id);
+            renderCustomerOffers();
+            renderAdminOffersTable();
+            showMsg("Deleted", "Offer successfully deleted.", "success");
+        }
+
+        function updateAdminStats() {
+            document.getElementById('statTotalOrders').innerText = orders.length;
+            const revenue = orders.filter(o => o.status === 'Delivered' || o.status === 'Preparing' || o.status === 'Ready').reduce((sum, o) => sum + o.total, 0);
+            document.getElementById('statRevenue').innerText = `Rs. ${revenue}`;
+            document.getElementById('statMenuItems').innerText = menuItems.length;
+        }
+
+        function showMsg(title, body, type = 'success') {
+            document.getElementById('msgTitle').innerText = title;
+            document.getElementById('msgBody').innerText = body;
+            const iconContainer = document.getElementById('msgIconContainer');
+            if (type === 'success') {
+                iconContainer.className = "w-14 h-14 mx-auto rounded-full flex items-center justify-center text-2xl bg-emerald-500/20 text-emerald-400";
+                iconContainer.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                iconContainer.className = "w-14 h-14 mx-auto rounded-full flex items-center justify-center text-2xl bg-red-500/20 text-red-400";
+                iconContainer.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            }
+            document.getElementById('msgModal').classList.remove('hidden');
+        }
+
+        SystemSKILLcreator_hidden = true; // internal safeguard
+        function closeMsgModal() {
+            document.getElementById('msgModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
